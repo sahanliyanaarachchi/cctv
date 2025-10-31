@@ -10,19 +10,19 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
 
 <style>
-body{background:#000; color:#f00; font-family:Arial; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; text-align:center;}
-h2{font-size:2rem; margin-bottom:15px; text-shadow:0 0 10px #f00;}
-#status{font-size:1.4rem; margin-top:10px; color:#ff6666;}
-#alertGif{display:none;width:200px; height:200px; object-fit:contain; margin-top:20px;}
-#screenshot{display:none;width:300px; margin-top:20px; border:2px solid #f00; border-radius:10px;}
+body{background:#000;color:#f00;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center;}
+h2{font-size:2rem;margin-bottom:15px;text-shadow:0 0 10px #f00;}
+#status{font-size:1.4rem;margin-top:10px;color:#ff6666;}
+#alertGif{display:none;width:200px;height:200px;object-fit:contain;margin-top:20px;}
+#screenshot{display:none;width:300px;margin-top:20px;border:2px solid #f00;border-radius:10px;}
 </style>
 </head>
 <body>
 <h2>🚨 HUMAN ALERT SYSTEM 🚨</h2>
 <div id="status">Waiting for detection...</div>
-<img id="alertGif" src="a.webp" alt="Alert">
+<img id="alertGif" src="https://media.tenor.com/GfSX-u7VGM4AAAAM/caution-alert.gif" alt="Alert">
 <img id="screenshot" src="" alt="Screenshot">
-<audio id="alarmSound" src="d.mp3" preload="auto"></audio>
+<audio id="alarmSound" src="https://www.soundjay.com/button/sounds/beep-07.mp3" preload="auto"></audio>
 
 <script>
 const firebaseConfig = {
@@ -50,8 +50,12 @@ db.ref("humanAlert").on("value", snapshot=>{
     alertGif.style.display="block";
     statusEl.textContent="🟢 HUMAN DETECTED!";
     statusEl.style.color="#00ff00";
-    if(data.screenshot)screenshot.src=data.screenshot;
-    screenshot.style.display=data.screenshot?"block":"none";
+    if(data.screenshot){
+      screenshot.src=data.screenshot;
+      screenshot.style.display="block";
+    } else {
+      screenshot.style.display="none";
+    }
     if(alarmSound.paused){alarmSound.currentTime=0; alarmSound.play().catch(err=>console.log("Sound blocked",err));}
     if("vibrate" in navigator) navigator.vibrate([300,200,300]);
   } else {
