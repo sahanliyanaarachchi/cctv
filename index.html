@@ -1,71 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Human Alert</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Human Alert</title>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
 
-<style>
-body{background:#000;color:#f00;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center;}
-h2{font-size:2rem;margin-bottom:15px;text-shadow:0 0 10px #f00;}
-#status{font-size:1.4rem;margin-top:10px;color:#ff6666;}
-#alertGif{display:none;width:200px;height:200px;object-fit:contain;margin-top:20px;}
-#screenshot{display:none;width:300px;margin-top:20px;border:2px solid #f00;border-radius:10px;}
-</style>
+  <style>
+    body {
+      background: radial-gradient(circle at center, #000 60%, #111);
+      color: #ff3333;
+      font-family: "Arial", sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      color: #ff3333;
+      text-shadow: 0 0 10px #ff0000;
+      animation: blinkTitle 1.5s infinite;
+    }
+
+    #alertGif {
+      display: none;
+      width: 200px;
+      height: 200px;
+      object-fit: contain;
+      margin-top: 20px;
+      animation: pulse 1s infinite;
+    }
+
+    #status {
+      font-size: 1.4rem;
+      margin-top: 15px;
+      color: #ff6666;
+      text-shadow: 0 0 8px #f00;
+    }
+
+    @keyframes blinkTitle {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0.5; }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+  </style>
 </head>
 <body>
-<h2>🚨 HUMAN ALERT SYSTEM 🚨</h2>
-<div id="status">Waiting for detection...</div>
-<img id="alertGif" src="https://media.tenor.com/GfSX-u7VGM4AAAAM/caution-alert.gif" alt="Alert">
-<img id="screenshot" src="" alt="Screenshot">
-<audio id="alarmSound" src="https://www.soundjay.com/button/sounds/beep-07.mp3" preload="auto"></audio>
+  <h2>🚨 HUMAN ALERT SYSTEM 🚨</h2>
+  <div id="status">Waiting for detection...</div>
+  
+  <!-- ⚠️ Centered Alert GIF -->
+  <img id="alertGif" src="https://media.tenor.com/GfSX-u7VGM4AAAAM/caution-alert.gif" alt="Alert">
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCeF1gnf_KJvIiRMy-_aSfIIurQq_8l1iI",
-  authDomain: "dansal-map-e0185.firebaseapp.com",
-  databaseURL: "https://dansal-map-e0185-default-rtdb.firebaseio.com",
-  projectId: "dansal-map-e0185",
-  storageBucket: "dansal-map-e0185.appspot.com",
-  messagingSenderId: "1006285824505",
-  appId: "1:1006285824505:web:135f9efdecb03073a15d28",
-  measurementId: "G-C8LJT9MD3X"
-};
+  <!-- 🔊 Custom Alarm Sound (You can replace the link below with your own MP3 file) -->
+  <audio id="alarmSound" src="https://www.soundjay.com/button/sounds/beep-07.mp3" preload="auto"></audio>
 
-firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCeF1gnf_KJvIiRMy-_aSfIIurQq_8l1iI",
+      authDomain: "dansal-map-e0185.firebaseapp.com",
+      databaseURL: "https://dansal-map-e0185-default-rtdb.firebaseio.com",
+      projectId: "dansal-map-e0185",
+      storageBucket: "dansal-map-e0185.firebasestorage.app",
+      messagingSenderId: "1006285824505",
+      appId: "1:1006285824505:web:135f9efdecb03073a15d28",
+      measurementId: "G-C8LJT9MD3X"
+    };
 
-const alarmSound=document.getElementById("alarmSound");
-const alertGif=document.getElementById("alertGif");
-const statusEl=document.getElementById("status");
-const screenshot=document.getElementById("screenshot");
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-db.ref("humanAlert").on("value", snapshot=>{
-  const data=snapshot.val();
-  if(data && data.personDetected){
-    alertGif.style.display="block";
-    statusEl.textContent="🟢 HUMAN DETECTED!";
-    statusEl.style.color="#00ff00";
-    if(data.screenshot){
-      screenshot.src=data.screenshot;
-      screenshot.style.display="block";
-    } else {
-      screenshot.style.display="none";
-    }
-    if(alarmSound.paused){alarmSound.currentTime=0; alarmSound.play().catch(err=>console.log("Sound blocked",err));}
-    if("vibrate" in navigator) navigator.vibrate([300,200,300]);
-  } else {
-    alertGif.style.display="none";
-    statusEl.textContent="🔴 No Human Detected";
-    statusEl.style.color="#ff3333";
-    screenshot.style.display="none";
-    alarmSound.pause();
-  }
-});
-</script>
+    const alarmSound = document.getElementById("alarmSound");
+    const alertGif = document.getElementById("alertGif");
+    const statusEl = document.getElementById("status");
+
+    // Firebase listener for human detection
+    db.ref("humanAlert").on("value", (snapshot) => {
+      const data = snapshot.val();
+
+      if (data && data.personDetected) {
+        // 🟢 Human detected
+        alertGif.style.display = "block";
+        statusEl.textContent = "🟢 HUMAN DETECTED!";
+        statusEl.style.color = "#00ff00";
+        statusEl.style.textShadow = "0 0 15px #0f0";
+
+        // Play sound
+        if (alarmSound.paused) {
+          alarmSound.currentTime = 0;
+          alarmSound.play().catch(err => console.log("Sound blocked:", err));
+        }
+
+        // Vibrate on mobile
+        if ("vibrate" in navigator) navigator.vibrate([300, 200, 300]);
+
+      } else {
+        // 🔴 No person
+        alertGif.style.display = "none";
+        statusEl.textContent = "🔴 No Human Detected";
+        statusEl.style.color = "#ff3333";
+        statusEl.style.textShadow = "0 0 10px #f00";
+        alarmSound.pause();
+      }
+    });
+  </script>
 </body>
 </html>
